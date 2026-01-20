@@ -4,10 +4,49 @@
 .AppleDouble
 .LSOverride
 
-# Python files
+# Python
 __pycache__/
-env/
+*.py[cod]
+*$py.class
+*.so
+.Python
 venv/
-build/
-dist/
+env/
+ENV/
+.venv
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Outputs
+output/
+*.csv
+*.xml
+*.xlsx
+
+# QR Codes e imagens de teste
+*.png
+*.jpg
+*.jpeg
+!docs/*.png
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Pytest
 .pytest_cache/
+.coverage
+htmlcov/
+
+# Distribution
+dist/
+build/
+*.egg-info/
