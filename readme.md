@@ -272,3 +272,7 @@ Este projeto é fornecido como está, para uso educacional e pessoal.
 ## 👤 Autor
 
 Desenvolvido seguindo princípios de código limpo e arquitetura modular.
+
+---
+
+**Dúvidas?** Consulte os exemplos em `main.py` ou abra uma issue.
