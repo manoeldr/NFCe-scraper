@@ -49,7 +49,15 @@ sudo apt-get install libzbar0
 **Windows:**
 Baixe o instalador do zbar em: https://sourceforge.net/projects/zbar/files/
 
-### 3. Crie um ambiente virtual
+### 3. Instale o Google Chrome
+
+O projeto usa Selenium com Chrome para web scraping.
+
+**Download:** https://www.google.com/chrome/
+
+**Nota:** O ChromeDriver será instalado automaticamente na primeira execução via `webdriver-manager`.
+
+### 4. Crie um ambiente virtual
 
 ```bash
 python -m venv venv
@@ -58,15 +66,13 @@ source venv/bin/activate  # Linux/Mac
 venv\Scripts\activate  # Windows
 ```
 
-### 4. Instale as dependências Python
+### 5. Instale as dependências Python
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 5. Instale o ChromeDriver
-
-O ChromeDriver será instalado automaticamente na primeira execução via `webdriver-manager`.
+### 6. Configure as variáveis de ambiente (opcional)
 
 ## 🚀 Como Usar
 
@@ -261,7 +267,7 @@ Melhorias são bem-vindas! Siga o padrão de código:
 
 ## 📄 Licença
 
-Este projeto é fornecido como está.
+Este projeto é fornecido como está, para uso educacional e pessoal.
 
 ## 👤 Autor
 
