@@ -9,6 +9,7 @@ Você precisará resolver o captcha manualmente.
 """
 from src.services.web_scraper_service import WebScraperService
 from src.services.qrcode_service import QRCodeService
+from src.repositories.csv_repository import CSVRepository
 
 
 def main():
@@ -119,12 +120,18 @@ def main():
         
         # Pergunta se quer salvar
         print("\n")
-        salvar = input("Deseja salvar os dados? (s/n): ").lower()
+        salvar = input("Deseja salvar os dados em CSV? (s/n): ").lower()
         
         if salvar == 's':
-            print("\nSalvando dados...")
-            print("TODO: Implementar salvamento (próximo passo)")
-            print("Formatos disponíveis: CSV, XML, JSON")
+            print("\nSalvando dados em CSV...")
+            
+            # Cria repositório e salva
+            csv_repo = CSVRepository()
+            arquivo_salvo = csv_repo.salvar(cupom_completo)
+            
+            print(f"Arquivo salvo com sucesso!")
+            print(f"Localização: {arquivo_salvo}")
+            print(f"\nAbra o arquivo no Excel ou LibreOffice para visualizar.")
     else:
         print("\nERRO: Nenhum dado foi extraído")
         print("\nVerifique se:")

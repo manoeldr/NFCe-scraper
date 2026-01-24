@@ -346,17 +346,31 @@ class WebScraperService:
             if config.get('forma_pagamento'):
                 try:
                     elem = self.driver.find_element(By.ID, "conteudo_DivMeiosPagamento")
-                    cupom.forma_pagamento = elem.text.strip()
+                    texto_completo = elem.text.strip()
+                    # Pega só a primeira linha (ex: "Cartão de Crédito")
+                    cupom.forma_pagamento = texto_completo.split('\n')[0] if texto_completo else "N/A"
                 except:
                     pass
             
             # Troco
             if config.get('troco'):
                 try:
-                    elem = self.driver.find_element(By.ID, "CupomDetalhe2")
+                    # Tenta primeiro pelo label específico dentro da div
+                    elem = self.driver.find_element(By.ID, "lblTroco")
                     cupom.troco = elem.text.strip()
                 except:
-                    pass
+                    # Fallback: procura por "Troco" no texto
+                    try:
+                        elem = self.driver.find_element(By.ID, "CupomDetalhe2")
+                        texto = elem.text.strip()
+                        # Procura linha com "Troco R$:"
+                        for linha in texto.split('\n'):
+                            if 'Troco R$:' in linha:
+                                # Pega o valor depois de "Troco R$:"
+                                cupom.troco = linha.replace('Troco R$:', '').strip()
+                                break
+                    except:
+                        pass
             
             # Tributos
             if config.get('tributos'):
@@ -670,13 +684,18 @@ class WebScraperService:
                         valor_liquido = "0,00"
                         print(f"AVISO: Valor líquido não encontrado para linha {idx}")
                     
-                    # GTIN (não tem ID específico, vamos tentar pegar da primeira célula)
+                    # GTIN
                     try:
-                        cod_gtin = celulas[0].text.strip()
+                        gtin_element = self.driver.find_element(
+                            By.ID,
+                            f"conteudo_grvProdutosServicos_lblProdutoServicoGtin_{linha_idx}"
+                        )
+                        cod_gtin = gtin_element.text.strip()
                         if not cod_gtin or cod_gtin == "Não Informado":
                             cod_gtin = None
                     except:
                         cod_gtin = None
+                        print(f"AVISO: GTIN não encontrado para linha {idx}")
                     
                     print(f"Produto {idx}: NCM={codigo_ncm}, Desc={descricao[:40]}, Qtd={quantidade}, Valor={valor_liquido}")
                     
