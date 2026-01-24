@@ -10,7 +10,13 @@ from typing import List, Optional
 import time
 
 from src.config import settings
+from src.config import campos_extracao
 from src.models.produto import Produto
+from src.models.emitente import Emitente
+from src.models.consumidor import Consumidor
+from src.models.cupom import Cupom
+from src.models.local_entrega import LocalEntrega
+from src.models.cupom_completo import CupomCompleto
 
 
 class WebScraperService:
@@ -165,6 +171,224 @@ class WebScraperService:
             print(f"ERRO ao clicar em Consultar: {str(e)}")
             return False
     
+    def extrair_emitente(self) -> Emitente:
+        """
+        Extrai dados do emitente (estabelecimento) da primeira tela
+        
+        Executa ANTES de clicar no botão Detalhes
+        
+        Returns:
+            Objeto Emitente com os dados extraídos
+        """
+        print("Extraindo dados do emitente...")
+        
+        emitente = Emitente()
+        config = campos_extracao.EXTRAIR_EMITENTE
+        
+        try:
+            # IE
+            if config.get('ie'):
+                try:
+                    elem = self.driver.find_element(By.ID, "conteudo_lblIeEmitente")
+                    emitente.ie = elem.text.strip()
+                except:
+                    pass
+            
+            # IM
+            if config.get('im'):
+                try:
+                    elem = self.driver.find_element(By.ID, "conteudo_lblImEmintente")
+                    emitente.im = elem.text.strip()
+                except:
+                    pass
+            
+            # Extrato Número
+            if config.get('extrato_numero'):
+                try:
+                    elem = self.driver.find_element(By.ID, "conteudo_lblNumeroCfe")
+                    emitente.extrato_numero = elem.text.strip()
+                except:
+                    pass
+            
+            # SAT Número
+            if config.get('sat_numero'):
+                try:
+                    elem = self.driver.find_element(By.ID, "conteudo_lblRazaoSocial")
+                    emitente.sat_numero = elem.text.strip()
+                except:
+                    pass
+            
+            # Nome
+            if config.get('nome'):
+                try:
+                    elem = self.driver.find_element(By.ID, "conteudo_lblNomeEmitente")
+                    emitente.nome = elem.text.strip()
+                except:
+                    pass
+            
+            # CNPJ
+            if config.get('cnpj'):
+                try:
+                    elem = self.driver.find_element(By.ID, "conteudo_lblCnpjEmitente")
+                    emitente.cnpj = elem.text.strip()
+                except:
+                    pass
+            
+            # Endereço
+            if config.get('endereco'):
+                try:
+                    elem = self.driver.find_element(By.ID, "conteudo_lblEnderecoEmintente")
+                    emitente.endereco = elem.text.strip()
+                except:
+                    pass
+            
+            # Bairro
+            if config.get('bairro'):
+                try:
+                    elem = self.driver.find_element(By.ID, "conteudo_lblBairroEmitente")
+                    emitente.bairro = elem.text.strip()
+                except:
+                    pass
+            
+            # CEP
+            if config.get('cep'):
+                try:
+                    elem = self.driver.find_element(By.ID, "conteudo_lblCepEmitente")
+                    emitente.cep = elem.text.strip()
+                except:
+                    pass
+            
+            # UF
+            if config.get('uf'):
+                try:
+                    elem = self.driver.find_element(By.ID, "conteudo_lblMunicipioEmitente")
+                    emitente.uf = elem.text.strip()
+                except:
+                    pass
+            
+            print(f"SUCESSO: Dados do emitente extraídos - {emitente.nome}")
+            return emitente
+            
+        except Exception as e:
+            print(f"ERRO ao extrair dados do emitente: {str(e)}")
+            return emitente
+    
+    def extrair_consumidor(self) -> Optional[Consumidor]:
+        """
+        Extrai dados do consumidor da primeira tela
+        
+        Executa ANTES de clicar no botão Detalhes
+        
+        Returns:
+            Objeto Consumidor ou None se não configurado/não encontrado
+        """
+        config = campos_extracao.EXTRAIR_CONSUMIDOR
+        
+        if not config.get('ativo'):
+            return None
+        
+        print("Extraindo dados do consumidor...")
+        
+        consumidor = Consumidor()
+        
+        try:
+            # CPF/CNPJ
+            if config.get('cpf_cnpj'):
+                try:
+                    elem = self.driver.find_element(By.ID, "conteudo_lblCpfConsumidor")
+                    consumidor.cpf_cnpj = elem.text.strip()
+                except:
+                    pass
+            
+            # Nome / Razão Social
+            if config.get('nome'):
+                try:
+                    elem = self.driver.find_element(By.ID, "conteudo_lblRazaoSocial")
+                    consumidor.nome = elem.text.strip()
+                except:
+                    pass
+            
+            if consumidor.esta_presente():
+                print(f"SUCESSO: Dados do consumidor extraídos - {consumidor.nome}")
+                return consumidor
+            else:
+                print("INFO: Consumidor não identificado no cupom")
+                return None
+            
+        except Exception as e:
+            print(f"AVISO ao extrair dados do consumidor: {str(e)}")
+            return None
+    
+    def extrair_cupom(self) -> Cupom:
+        """
+        Extrai dados gerais do cupom da primeira tela
+        
+        Executa ANTES de clicar no botão Detalhes
+        
+        Returns:
+            Objeto Cupom com os dados extraídos
+        """
+        print("Extraindo dados do cupom...")
+        
+        cupom = Cupom()
+        config = campos_extracao.EXTRAIR_CUPOM
+        
+        try:
+            # Total
+            if config.get('total'):
+                try:
+                    elem = self.driver.find_element(By.ID, "conteudo_lblTotal")
+                    cupom.total = elem.text.strip()
+                except:
+                    pass
+            
+            # Forma de Pagamento
+            if config.get('forma_pagamento'):
+                try:
+                    elem = self.driver.find_element(By.ID, "conteudo_DivMeiosPagamento")
+                    cupom.forma_pagamento = elem.text.strip()
+                except:
+                    pass
+            
+            # Troco
+            if config.get('troco'):
+                try:
+                    elem = self.driver.find_element(By.ID, "CupomDetalhe2")
+                    cupom.troco = elem.text.strip()
+                except:
+                    pass
+            
+            # Tributos
+            if config.get('tributos'):
+                try:
+                    elem = self.driver.find_element(By.ID, "conteudo_lblTotal12741")
+                    cupom.tributos = elem.text.strip()
+                except:
+                    pass
+            
+            # Data e Hora
+            if config.get('data_hora'):
+                try:
+                    elem = self.driver.find_element(By.ID, "conteudo_lblDataEmissao")
+                    cupom.data_hora = elem.text.strip()
+                except:
+                    pass
+            
+            # QR Code
+            if config.get('qr_code'):
+                try:
+                    elem = self.driver.find_element(By.ID, "conteudo_lblIdCfe")
+                    cupom.qr_code = elem.text.strip()
+                except:
+                    pass
+            
+            print(f"SUCESSO: Dados do cupom extraídos - Total: {cupom.total}")
+            return cupom
+            
+        except Exception as e:
+            print(f"ERRO ao extrair dados do cupom: {str(e)}")
+            return cupom
+    
     def clicar_detalhes(self):
         """
         Clica no botão Detalhes para acessar informações completas (incluindo NCM)
@@ -231,6 +455,117 @@ class WebScraperService:
         except Exception as e:
             print(f"ERRO ao clicar em Detalhes: {str(e)}")
             return False
+    
+    def clicar_aba_local_entrega(self) -> bool:
+        """
+        Clica na aba "Local de Entrega" (se existir)
+        
+        Returns:
+            True se clicou com sucesso, False se não encontrou
+        """
+        print("Verificando aba Local de Entrega...")
+        
+        try:
+            # Aguarda menos tempo (5 segundos)
+            wait_curto = WebDriverWait(self.driver, 5)
+            
+            aba_local = wait_curto.until(
+                EC.element_to_be_clickable((By.ID, "conteudo_tabEmissao"))
+            )
+            
+            aba_local.click()
+            print("SUCESSO: Aba Local de Entrega clicada")
+            time.sleep(2)
+            return True
+            
+        except TimeoutException:
+            print("INFO: Aba Local de Entrega não encontrada")
+            return False
+        except Exception as e:
+            print(f"AVISO: Erro ao clicar em Local de Entrega: {str(e)}")
+            return False
+    
+    def extrair_local_entrega(self) -> Optional[LocalEntrega]:
+        """
+        Extrai dados do local de entrega (se existir)
+        
+        Executa DEPOIS de clicar no botão Detalhes, na aba "Local de Entrega"
+        
+        Returns:
+            Objeto LocalEntrega ou None se não configurado/não encontrado
+        """
+        config = campos_extracao.EXTRAIR_LOCAL_ENTREGA
+        
+        if not config.get('ativo'):
+            return None
+        
+        # Tenta clicar na aba
+        if not self.clicar_aba_local_entrega():
+            return None
+        
+        print("Extraindo dados do local de entrega...")
+        
+        local = LocalEntrega()
+        
+        try:
+            # Endereço
+            if config.get('endereco'):
+                try:
+                    elem = self.driver.find_element(By.ID, "conteudo_lblDadosLocalEntregaEndereco")
+                    local.endereco = elem.text.strip()
+                except:
+                    pass
+            
+            # Bairro
+            if config.get('bairro'):
+                try:
+                    elem = self.driver.find_element(By.ID, "conteudo_lblDadosLocalEntregaBairro")
+                    local.bairro = elem.text.strip()
+                except:
+                    pass
+            
+            # Município
+            if config.get('municipio'):
+                try:
+                    elem = self.driver.find_element(By.ID, "conteudo_lblDadosLocalEntregaMunicipio")
+                    local.municipio = elem.text.strip()
+                except:
+                    pass
+            
+            # UF
+            if config.get('uf'):
+                try:
+                    elem = self.driver.find_element(By.ID, "conteudo_lblDadosLocalEntregaUF")
+                    local.uf = elem.text.strip()
+                except:
+                    pass
+            
+            # Número CF-e
+            if config.get('numero_cfe'):
+                try:
+                    elem = self.driver.find_element(By.ID, "conteudo_lblCfeNumero")
+                    local.numero_cfe = elem.text.strip()
+                except:
+                    pass
+            
+            # Chave de Acesso
+            if config.get('chave_acesso'):
+                try:
+                    elem = self.driver.find_element(By.ID, "conteudo_lblChaveAcesso")
+                    local.chave_acesso = elem.text.strip()
+                except:
+                    pass
+            
+            if local.esta_presente():
+                print(f"SUCESSO: Local de entrega encontrado - {local.municipio}/{local.uf}")
+                return local
+            else:
+                print("INFO: Local de entrega não preenchido")
+                return None
+            
+        except Exception as e:
+            print(f"AVISO ao extrair local de entrega: {str(e)}")
+            return None
     
     def clicar_aba_produtos(self):
         """
@@ -379,15 +714,15 @@ class WebScraperService:
             print(f"ERRO ao extrair produtos: {str(e)}")
             return []
     
-    def extrair_dados_cupom(self, chave: str) -> Optional[List[Produto]]:
+    def extrair_dados_cupom(self, chave: str) -> Optional[CupomCompleto]:
         """
-        Fluxo completo: extrai dados de um cupom fiscal
+        Fluxo completo: extrai TODOS os dados de um cupom fiscal
         
         Args:
             chave: Chave de acesso do cupom (44 dígitos)
         
         Returns:
-            Lista de produtos extraídos ou None em caso de erro
+            CupomCompleto com todos os dados ou None em caso de erro
         """
         try:
             # 1. Inicia o navegador
@@ -408,27 +743,66 @@ class WebScraperService:
             if not self.clicar_consultar():
                 return None
             
-            # 6. Clica em Detalhes (OBRIGATÓRIO para ver NCM)
+            # 6. Extrai dados da PRIMEIRA TELA (antes de clicar Detalhes)
+            print("\n" + "="*70)
+            print("EXTRAINDO DADOS DA PRIMEIRA TELA")
+            print("="*70)
+            
+            emitente = self.extrair_emitente()
+            consumidor = self.extrair_consumidor()
+            cupom = self.extrair_cupom()
+            
+            # 7. Clica em Detalhes (para acessar abas)
             if not self.clicar_detalhes():
                 print("ERRO: Não foi possível acessar a tela de detalhes")
                 return None
             
-            # 7. Clica na aba Produtos/Serviços (OBRIGATÓRIO para ver NCM)
+            # 8. Extrai Local de Entrega (se configurado)
+            print("\n" + "="*70)
+            print("EXTRAINDO LOCAL DE ENTREGA")
+            print("="*70)
+            
+            local_entrega = self.extrair_local_entrega()
+            
+            # 9. Clica na aba Produtos/Serviços
+            print("\n" + "="*70)
+            print("EXTRAINDO PRODUTOS")
+            print("="*70)
+            
             if not self.clicar_aba_produtos():
                 print("ERRO: Não foi possível acessar a aba de produtos")
                 return None
             
-            # 8. Extrai os produtos com NCM
-            produtos = self.extrair_produtos()
+            # 10. Extrai os produtos
+            config_produtos = campos_extracao.EXTRAIR_PRODUTOS
             
-            if not produtos:
-                print("AVISO: Nenhum produto foi extraído")
-                return None
+            if not config_produtos.get('ativo'):
+                print("INFO: Extração de produtos desativada na configuração")
+                produtos = []
+            else:
+                produtos = self.extrair_produtos()
+                
+                if not produtos:
+                    print("AVISO: Nenhum produto foi extraído")
             
-            return produtos
+            # 11. Monta o objeto completo
+            cupom_completo = CupomCompleto(
+                emitente=emitente,
+                consumidor=consumidor,
+                cupom=cupom,
+                local_entrega=local_entrega,
+                produtos=produtos
+            )
+            
+            print("\n" + "="*70)
+            print("EXTRAÇÃO CONCLUÍDA COM SUCESSO!")
+            print("="*70)
+            print(cupom_completo)
+            
+            return cupom_completo
             
         except Exception as e:
-            print(f"ERRO no fluxo de extração: {str(e)}")
+            print(f"\nERRO no fluxo de extração: {str(e)}")
             return None
         
         finally:
